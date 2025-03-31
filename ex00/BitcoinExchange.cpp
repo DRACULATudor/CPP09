@@ -58,7 +58,6 @@ std::string DateParser(std::string &date_to_parse)
     date_to_parse = SpaceRemover(date_to_parse);
     if (date_to_parse.length() != 10)
     {
-        std::cout << "Error: invalid date length" << std::endl;
         date_to_parse = "";
     }
     if (date_to_parse[4] != '-' || date_to_parse[7] != '-')
@@ -94,7 +93,7 @@ std::string process_date(std::string &to_parse)
     month = atoi(to_parse.substr(5, 2).c_str());
     day = atoi(to_parse.substr(8, 2).c_str());
     if (!isgoodDate(year, month, day))
-        std::cout << "Invalid year/month/date !" << std::endl;
+        parsed = "";
     return parsed;
 }
 
@@ -148,9 +147,7 @@ std::multimap<std::string, double> BitcoinExchange::prepare_exchange(const std::
             getline(strstr, date, ',');
             date = process_date(date);
             if (date.empty())
-            {
                 map.insert(std::make_pair(line_prefix + line, -999));
-            }
             else
             {
                 getline(strstr, val);
@@ -160,11 +157,9 @@ std::multimap<std::string, double> BitcoinExchange::prepare_exchange(const std::
                 doubl << val;
                 doubl >> value;
                 if (doubl.fail())
-                {
-                    std::cout << "Error: Invalid value" << std::endl;
-                    continue;
-                }
-                map.insert(std::make_pair(date, value));
+                    map.insert(std::make_pair(line_prefix + val, -999));
+                else
+                    map.insert(std::make_pair(line_prefix + date, value));
             }
             
         }
@@ -185,11 +180,9 @@ std::multimap<std::string, double> BitcoinExchange::prepare_exchange(const std::
                 doubl << val;
                 doubl >> value;
                 if (doubl.fail())
-                {
-                    std::cout << "Error: Invalid value" << std::endl;
-                    continue;
-                }
-                map.insert(std::make_pair(date, value));
+                    map.insert(std::make_pair(line_prefix + val, -999));
+                else
+                    map.insert(std::make_pair(line_prefix + date, value));
             }
         }
         else if (line.find(' ') != std::string::npos)
@@ -197,25 +190,25 @@ std::multimap<std::string, double> BitcoinExchange::prepare_exchange(const std::
             getline(strstr, date, ' ');
             date = process_date(date);
             if (date.empty())
-                return std::multimap<std::string, double>();
-            getline(strstr, val);
-            val = SpaceRemover(val);
-            doubl.clear();
-            doubl.str("");
-            doubl << val;
-            doubl >> value;
-            if (doubl.fail())
             {
-                std::cout << "Error: Invalid value" << std::endl;
-                continue;
+                map.insert(std::make_pair(line_prefix + line, -999));
             }
-            map.insert(std::make_pair(date, value));
+            else
+            {
+                getline(strstr, val);
+                val = SpaceRemover(val);
+                doubl.clear();
+                doubl.str("");
+                doubl << val;
+                doubl >> value;
+                if (doubl.fail())
+                    map.insert(std::make_pair(line_prefix + val, -999));
+                else
+                    map.insert(std::make_pair(line_prefix + date, value));
+            }
         }
         else
-        {
             map.insert(std::make_pair(line_prefix + line, -999));
-            continue;
-        }
     }
     return map;
 }
@@ -257,6 +250,7 @@ void BitcoinExchange::setFileName(const std::string &file)
                 }
                 else
                 {
+                    
                     std::cout << key << " => " << val << " = " << exchange_rate_result << std::endl;
                 }
             }
