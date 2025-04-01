@@ -121,7 +121,7 @@ bool isallNum(std::string val)
             if (i + 1 >= val.length())
                 return false;
         }
-        else if (!isdigit(val[i]))
+        else if (!isdigit(val[i]) && val[i] != '-')
             return false;
     }
     if (dot_count > 1)
