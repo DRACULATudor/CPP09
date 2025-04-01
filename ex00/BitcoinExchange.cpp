@@ -86,9 +86,7 @@ std::string process_date(std::string &to_parse)
 
     parsed = DateParser(to_parse);
     if (parsed.length() == 0)
-    {
         return parsed;
-    }
     year = atoi(to_parse.substr(0, 4).c_str());
     month = atoi(to_parse.substr(5, 2).c_str());
     day = atoi(to_parse.substr(8, 2).c_str());
@@ -112,6 +110,74 @@ bool validate_value(double val)
     return true;
 }
 
+bool isallNum(std::string val)
+{
+    int dot_count = 0;
+    for (size_t i = 0; i < val.length(); ++i)
+    {
+        if (val[i] == '.')
+        {
+            dot_count++;
+            if (i + 1 >= val.length())
+                return false;
+        }
+        else if (!isdigit(val[i]))
+            return false;
+    }
+    if (dot_count > 1)
+        return false;
+    
+    return true;
+}
+
+void add_values_to_map(std::multimap<std::string, double> &map, double value, std::string val, std::string date, std::string line, int &line_num)
+{
+    std::stringstream doubl;
+    std::ostringstream oss;
+    oss << std::setfill('0') << std::setw(3) << line_num << "_";
+    std::string line_prefix = oss.str();
+    std::stringstream strstr(line);
+
+    line_num++;
+    date = process_date(date);
+    if (date.empty())
+        map.insert(std::make_pair(line_prefix + line, -999));
+    else
+    {
+        val = SpaceRemover(val);
+        doubl.clear();
+        doubl.str("");
+        doubl << val;
+        doubl >> value;
+        if (doubl.fail())
+        {
+            if (value == 0)
+                map.insert(std::make_pair(line_prefix + line, -999));
+            else
+                map.insert(std::make_pair(line_prefix + val, -999));
+        }
+        else
+        {
+            if (!isallNum(val))
+                map.insert(std::make_pair(line_prefix + val, -999));
+            else
+                map.insert(std::make_pair(line_prefix + date, value));
+        }
+    }
+}
+
+std::string SkipWspaces(std::string line)
+{
+    std::stringstream strstr(line);
+    size_t i = 0;
+    while (i < line.size() && isspace(line[i]))
+        i++;
+    line = line.substr(i);
+    strstr.str(line);
+    strstr.clear();
+    return line;
+}
+
 std::multimap<std::string, double> BitcoinExchange::prepare_exchange(const std::string &file)
 {
     std::string line;
@@ -126,91 +192,39 @@ std::multimap<std::string, double> BitcoinExchange::prepare_exchange(const std::
     getline(fil, line);
     while (getline(fil, line))
     {
-        line_num++;
         std::ostringstream oss;
         oss << std::setfill('0') << std::setw(3) << line_num << "_";
         std::string line_prefix = oss.str();
         std::stringstream strstr(line);
         if (line[0] == ' ')
-        {
-            size_t i = 0;
-            while (i < line.size() && isspace(line[i]))
-            {
-                i++;
-            }
-            line = line.substr(i);
-            strstr.str(line);
-            strstr.clear();
-        }
+            line = SkipWspaces(line);
         if (line.find(',') != std::string::npos)
         {
             getline(strstr, date, ',');
-            date = process_date(date);
-            if (date.empty())
-                map.insert(std::make_pair(line_prefix + line, -999));
-            else
-            {
-                getline(strstr, val);
-                val = SpaceRemover(val);
-                doubl.clear();
-                doubl.str("");
-                doubl << val;
-                doubl >> value;
-                if (doubl.fail())
-                    map.insert(std::make_pair(line_prefix + val, -999));
-                else
-                    map.insert(std::make_pair(line_prefix + date, value));
-            }
-            
+            getline(strstr, val);
+            add_values_to_map(map, value, val, date, line, line_num);
         }
         else if (line.find('|') != std::string::npos)
         {
             getline(strstr, date, '|');
-            date = process_date(date);
-            if (date.empty())
-            {
-                map.insert(std::make_pair(line_prefix + line, -999));
-            }
-            else
-            {
-                getline(strstr, val);
-                val = SpaceRemover(val);
-                doubl.clear();
-                doubl.str("");
-                doubl << val;
-                doubl >> value;
-                if (doubl.fail())
-                    map.insert(std::make_pair(line_prefix + val, -999));
-                else
-                    map.insert(std::make_pair(line_prefix + date, value));
-            }
+            getline(strstr, val);
+            add_values_to_map(map, value, val, date, line, line_num);
         }
         else if (line.find(' ') != std::string::npos)
         {
             getline(strstr, date, ' ');
-            date = process_date(date);
-            if (date.empty())
-            {
-                map.insert(std::make_pair(line_prefix + line, -999));
-            }
-            else
-            {
-                getline(strstr, val);
-                val = SpaceRemover(val);
-                doubl.clear();
-                doubl.str("");
-                doubl << val;
-                doubl >> value;
-                if (doubl.fail())
-                    map.insert(std::make_pair(line_prefix + val, -999));
-                else
-                    map.insert(std::make_pair(line_prefix + date, value));
-            }
+            getline(strstr, val);
+            add_values_to_map(map, value, val, date, line, line_num);
         }
         else
             map.insert(std::make_pair(line_prefix + line, -999));
     }
     return map;
+}
+
+void BitcoinExchange::ExchangeEngine()
+{
+    
 }
 
 void BitcoinExchange::setFileName(const std::string &file)
@@ -221,6 +235,8 @@ void BitcoinExchange::setFileName(const std::string &file)
     map = prepare_exchange(file);
     for (it_for_smap = map.begin(); it_for_smap != map.end(); ++it_for_smap)
     {
+
+
         std::string full_key = it_for_smap->first;
         size_t pos = full_key.find('_');
         std::string key;
@@ -250,7 +266,6 @@ void BitcoinExchange::setFileName(const std::string &file)
                 }
                 else
                 {
-                    
                     std::cout << key << " => " << val << " = " << exchange_rate_result << std::endl;
                 }
             }

@@ -20,5 +20,6 @@ public:
     ~BitcoinExchange();
     void setFileName(const std::string &file);
     void Load_DB_for_BitcoinExchange();
+    void ExchangeEngine();
     std::multimap<std::string, double>prepare_exchange(const std::string &file);
 };
