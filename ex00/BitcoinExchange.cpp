@@ -130,19 +130,34 @@ bool isallNum(std::string val)
     return true;
 }
 
-void add_values_to_map(std::multimap<std::string, double> &map, double value, std::string val, std::string date, std::string line, int &line_num)
+
+std::string SkipWspaces(std::string line)
 {
+    std::stringstream strstr(line);
+    size_t i = 0;
+    while (i < line.size() && isspace(line[i]))
+        i++;
+    line = line.substr(i);
+    strstr.str(line);
+    strstr.clear();
+    return line;
+}
+
+void add_values_to_map(std::multimap<std::string, double> &map, std::string val, std::string date, std::string line, bool elsFlg)
+{
+    static int line_num = 0;
     std::stringstream doubl;
     std::ostringstream oss;
     oss << std::setfill('0') << std::setw(3) << line_num << "_";
     std::string line_prefix = oss.str();
     std::stringstream strstr(line);
+    double value = 0;
 
     line_num++;
     date = process_date(date);
     if (date.empty())
         map.insert(std::make_pair(line_prefix + line, -999));
-    else
+    else if(!elsFlg)
     {
         val = SpaceRemover(val);
         doubl.clear();
@@ -164,18 +179,8 @@ void add_values_to_map(std::multimap<std::string, double> &map, double value, st
                 map.insert(std::make_pair(line_prefix + date, value));
         }
     }
-}
-
-std::string SkipWspaces(std::string line)
-{
-    std::stringstream strstr(line);
-    size_t i = 0;
-    while (i < line.size() && isspace(line[i]))
-        i++;
-    line = line.substr(i);
-    strstr.str(line);
-    strstr.clear();
-    return line;
+    else
+        map.insert(std::make_pair(line_prefix + date, -999));
 }
 
 std::multimap<std::string, double> BitcoinExchange::prepare_exchange(const std::string &file)
@@ -183,18 +188,13 @@ std::multimap<std::string, double> BitcoinExchange::prepare_exchange(const std::
     std::string line;
     std::string date;
     std::string val;
-    std::stringstream doubl;
-    int line_num = 0;
     std::multimap<std::string, double> map;
-    double value = 0;
+    bool elsFlg = false;
     _file = file;
     std::ifstream fil(_file.c_str());
     getline(fil, line);
     while (getline(fil, line))
     {
-        std::ostringstream oss;
-        oss << std::setfill('0') << std::setw(3) << line_num << "_";
-        std::string line_prefix = oss.str();
         std::stringstream strstr(line);
         if (line[0] == ' ')
             line = SkipWspaces(line);
@@ -202,54 +202,62 @@ std::multimap<std::string, double> BitcoinExchange::prepare_exchange(const std::
         {
             getline(strstr, date, ',');
             getline(strstr, val);
-            add_values_to_map(map, value, val, date, line, line_num);
+            add_values_to_map(map,  val, date, line, elsFlg);
         }
         else if (line.find('|') != std::string::npos)
         {
             getline(strstr, date, '|');
             getline(strstr, val);
-            add_values_to_map(map, value, val, date, line, line_num);
+            add_values_to_map(map,  val, date, line, elsFlg);
         }
         else if (line.find(' ') != std::string::npos)
         {
             getline(strstr, date, ' ');
             getline(strstr, val);
-            add_values_to_map(map, value, val, date, line, line_num);
+            add_values_to_map(map,  val, date, line, elsFlg);
         }
         else
-            map.insert(std::make_pair(line_prefix + line, -999));
+        {
+            elsFlg = true;
+            add_values_to_map(map,  val, date, line, elsFlg);
+            elsFlg = false;
+        }
     }
     return map;
 }
 
-void BitcoinExchange::ExchangeEngine()
+void ExchangeOutput(double val, std::string key, double exchange_rate_result)
 {
-    
+    if (validate_value(val))
+    {
+        if (val == static_cast<int>(val))
+            std::cout << key << " => " << static_cast<int>(val) << " = " << exchange_rate_result << std::endl;
+        else
+            std::cout << key << " => " << val << " = " << exchange_rate_result << std::endl;
+    }
 }
 
 void BitcoinExchange::setFileName(const std::string &file)
 {
+    double val = 0;
+    double exchange_rate_result = 0;
+    std::string full_key;
+    std::string key;
     std::multimap<std::string, double> map;
     std::multimap<std::string, double>::iterator it_for_smap;
+    std::multimap<std::string, double>::iterator it;
 
     map = prepare_exchange(file);
     for (it_for_smap = map.begin(); it_for_smap != map.end(); ++it_for_smap)
     {
-
-
-        std::string full_key = it_for_smap->first;
+        full_key = it_for_smap->first;
         size_t pos = full_key.find('_');
-        std::string key;
         if (pos != std::string::npos)
-        {
             key = full_key.substr(pos + 1);
-        }
         else
-        {
             key = full_key;
-        }
-        double val = it_for_smap->second;
-        std::multimap<std::string, double>::iterator it = _map.lower_bound(key);
+        val = it_for_smap->second;
+        it = _map.lower_bound(key);
         if (val == -999)
         {
             std::cout << "Error: bad input => " << key << std::endl;
@@ -257,35 +265,14 @@ void BitcoinExchange::setFileName(const std::string &file)
         }
         if (it != _map.end() && it->first == key)
         {
-            double exchange_rate_result = val * it->second;
-            if (validate_value(val))
-            {
-                if (val == static_cast<int>(val))
-                {
-                    std::cout << key << " => " << static_cast<int>(val) << " = " << exchange_rate_result << std::endl;
-                }
-                else
-                {
-                    std::cout << key << " => " << val << " = " << exchange_rate_result << std::endl;
-                }
-            }
+            exchange_rate_result = val * it->second;
+            ExchangeOutput(val,key,exchange_rate_result);
         }
         else if (it != _map.begin())
         {
             --it;
-            double exchange_rate_result = val * it->second;
-
-            if (validate_value(val))
-            {
-                if (val == static_cast<int>(val))
-                {
-                    std::cout << key << " => " << static_cast<int>(val) << " = " << exchange_rate_result << std::endl;
-                }
-                else
-                {
-                    std::cout << key << " => " << val << " = " << exchange_rate_result << std::endl;
-                }
-            }
+            exchange_rate_result = val * it->second;
+            ExchangeOutput(val,key,exchange_rate_result);
         }
     }
 }
