@@ -17,7 +17,9 @@ public:
     RPN();
     RPN(const RPN &copy);
     RPN &operator=(const RPN &assign);
+    void addToStck(std::string val);
     void StartStack(std::string ecuasion);
     ~RPN();
 };
 
+//"8 9 * 9 - 9 - 9 - 4 - 1 +"
