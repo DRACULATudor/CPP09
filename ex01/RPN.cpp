@@ -76,6 +76,20 @@ void RPN::StartStack(std::string ecuasion)
             int rez = doRPN(firstelem, secondelem, ecuasion[i]);
             _stck.push(rez);
         }
+        else if (ecuasion[i] == ' ')
+        {
+            continue;
+        }
+        else
+        {
+            std::cerr << "Error: Invalid character !" << std::endl;
+            return;
+        }
+    }
+    if (_stck.size() != 1)
+    {
+        std::cerr << "Error: Invalid RPN !" << std::endl;
+        return;
     }
     std::cout << _stck.top() << std::endl;
     return;
