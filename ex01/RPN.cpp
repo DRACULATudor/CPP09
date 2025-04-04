@@ -41,9 +41,11 @@ int doRPN(int firstelem, int secondelem, char sign)
     }
 }
 
+
 void RPN::StartStack(std::string ecuasion)
 {
     std::stringstream strstr;
+    bool valid = false;
     int firstelem = 0;
     int secondelem = 0;
     int val = 0;
@@ -64,6 +66,7 @@ void RPN::StartStack(std::string ecuasion)
         }
         else if (ecuasion[i] == '-' || ecuasion[i] == '+' || ecuasion[i] == '/' || ecuasion[i] == '*')
         {
+            valid = true;
             if (_stck.size() < 2)
             {
                 std::cerr << "Error: Invalid number of elements in the stack !" << std::endl;
@@ -91,7 +94,17 @@ void RPN::StartStack(std::string ecuasion)
         std::cerr << "Error: Invalid RPN !" << std::endl;
         return;
     }
-    std::cout << _stck.top() << std::endl;
+    if (valid)
+    {
+        std::cout << _stck.top() << std::endl;
+    }
+    else
+    {
+        std::cerr << "Error: Invalid size !" << std::endl;
+        return;
+    }
+    
+    
     return;
 }
 
