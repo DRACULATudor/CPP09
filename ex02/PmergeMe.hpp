@@ -4,16 +4,21 @@
 #include <iomanip>
 #include <iostream>
 #include <algorithm>
-#include <stack>
+#include <vector>
+#include <deque>
 #include <fstream>
 #include <sstream>
 
 class PmergeMe
 {
 private:
-    /* data */
+    std::vector<unsigned int, unsigned int> _vec;
 public:
-    PmergeMe(/* args */);
+
+    PmergeMe();
+    PmergeMe(const PmergeMe &copy);
+    PmergeMe &operator=(const PmergeMe &assign);
+    void loadVector(char **to_conv);
     ~PmergeMe();
 };
 
