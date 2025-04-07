@@ -12,13 +12,14 @@
 class PmergeMe
 {
 private:
-    std::vector<unsigned int, unsigned int> _vec;
+    std::vector<std::pair<unsigned int, unsigned int> > _vec;
+    std::vector<unsigned int> _orig;
 public:
-
     PmergeMe();
     PmergeMe(const PmergeMe &copy);
     PmergeMe &operator=(const PmergeMe &assign);
     void loadVector(char **to_conv);
+    void startFordJhon();
     ~PmergeMe();
 };
 
