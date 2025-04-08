@@ -29,7 +29,7 @@ void PmergeMe::startFordJhon()
 {
     for (size_t i = 0; i < _orig.size(); i++)
     {
-        std::cout << _orig[i] << " ";
+        
     }
 }
 
