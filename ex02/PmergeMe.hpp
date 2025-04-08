@@ -19,7 +19,6 @@ public:
     PmergeMe(const PmergeMe &copy);
     PmergeMe &operator=(const PmergeMe &assign);
     void loadVector(char **to_conv);
-    void startFordJhon();
+    void startFordJhon(std::vector<unsigned int> orig);
     ~PmergeMe();
 };
-
