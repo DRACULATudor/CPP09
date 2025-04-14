@@ -20,9 +20,9 @@ void PmergeMe::loadVector(char **to_conv)
 
     if (to_conv[0] && !isdigit(to_conv[0][0]))
         to_conv++;
-    for(size_t i = 0; to_conv[i]; i++)
+    for (size_t i = 0; to_conv[i]; i++)
         _orig.push_back(atol(to_conv[i]));
-    if (_orig.size() % 2  != 0)
+    if (_orig.size() % 2 != 0)
     {
 
         _has_odd = true;
@@ -44,72 +44,152 @@ std::vector<std::pair<unsigned int, unsigned int> > PmergeMe::MergeCompPairs(std
 
     std::vector<std::pair<unsigned int, unsigned int> >::iterator left_it = left.begin();
     std::vector<std::pair<unsigned int, unsigned int> >::iterator right_it = right.begin();
-    std::vector<std::pair<unsigned int, unsigned int> > mainchain;
+    std::vector<std::pair<unsigned int, unsigned int> > merged;
 
-    std::cout << "here\n";
     while (left_it != left.end() && right_it != right.end())
     {
         if (left_it->first <= right_it->first)
         {
-            mainchain.push_back(*left_it);
+            merged.push_back(*left_it);
             ++left_it;
         }
         else
         {
-            mainchain.push_back(*right_it);
+            merged.push_back(*right_it);
             ++right_it;
         }
     }
     while (left_it != left.end())
     {
-        mainchain.push_back(*left_it);
+        merged.push_back(*left_it);
         ++left_it;
     }
     while (right_it != right.end())
     {
-        mainchain.push_back(*right_it);
+        merged.push_back(*right_it);
         ++right_it;
     }
-    std::vector<std::pair<unsigned int, unsigned int> >::iterator it;
-    for (it = mainchain.begin(); it != mainchain.end(); ++it)
-    {
-        std::cout << it->first << " " << it->second <<"   ";
-    }
-
-    return mainchain;
+    return merged;
 }
-
 
 std::vector<std::pair<unsigned int, unsigned int> >
 PmergeMe::startRecMerging(std::vector<std::pair<unsigned int, unsigned int> > vec)
 {
+
+    if (vec.size() <= 1)
+    {
+        return (vec);
+    }
     size_t mid = vec.size() / 2;
     std::vector<std::pair<unsigned int, unsigned int> > left(vec.begin(), vec.begin() + mid);
     std::vector<std::pair<unsigned int, unsigned int> > right(vec.begin() + mid, vec.end());
+
     left = startRecMerging(left);
     right = startRecMerging(right);
-
     return MergeCompPairs(left, right);
+}
+
+unsigned int binarySearch(std::vector<unsigned int> vector, unsigned int target)
+{
+    if (vector.empty())
+        return (0);
+    unsigned int left = 0;
+    unsigned int right = vector.size() - 1;
+    while (left <= right)
+    {
+        unsigned int mid = (left + right) / 2;
+        if (vector[mid] == target)
+            return mid;
+        else if (target > vector[mid])
+            left = mid + 1;
+        else
+            right = mid - 1;
+    }
+
+    return left;
+}
+
+std::vector<unsigned int> generateJacobNumbers(unsigned int size)
+{
+    std::vector<unsigned int> result;
+    if (size <= 1)
+    {
+        return result;
+    }
+    result.push_back(1);
+    unsigned int curr = 1;
+    unsigned int temp = 0;
+    unsigned int next = 1;
+    while (next < size)
+    {
+        temp = next;
+        next = next + 2 * curr;
+        curr = temp;
+        for (unsigned int i = next; i > curr; i--)
+        {
+            if (i <= size)
+                result.push_back(i);
+        }
+    }
+    return result;
+}
+
+std::vector<unsigned int> startJhonInsert(std::vector<unsigned int> &MainChain, std::vector<unsigned int> &Pend, std::vector<unsigned int> &JachobtalNUmbs)
+{
+    std::vector<unsigned int> sorted;
+    unsigned int pos = 0;
+
+    if (MainChain.empty())
+    {
+        return sorted;
+    }
+    sorted.push_back(MainChain[0]);
+    
+    for (unsigned int i = 0; i < JachobtalNUmbs.size() && i < Pend.size(); i++)
+    {
+        if (JachobtalNUmbs[i] == 0 || JachobtalNUmbs[i] > Pend.size())
+            continue;
+        
+        unsigned int idex = JachobtalNUmbs[i] - 1;
+
+        pos = binarySearch(sorted, Pend[idex]);
+        sorted.insert(sorted.begin() + pos, Pend[idex]);
+        
+    }
+    return sorted;
 }
 
 void PmergeMe::startFordJhon(std::vector<unsigned int> orig)
 {
     (void)orig;
-    
+    std::vector<unsigned int> mainChain;
+    std::vector<unsigned int> sorted;
+    std::vector<unsigned int> Pend;
     
     std::vector<std::pair<unsigned int, unsigned int> >::iterator it;
     for (it = _vec.begin(); it != _vec.end(); ++it)
     {
         if (it->first < it->second)
-        {
-            std::swap(it->first, it->second);
-        }
+        std::swap(it->first, it->second);
     }
+    
+    _vec = startRecMerging(_vec);
+    for (it = _vec.begin(); it != _vec.end(); ++it)
+    {
+        mainChain.push_back(it->first);
+        Pend.push_back(it->second);
+    }
+    std::vector<unsigned int> JachobtalNUmbs = generateJacobNumbers(Pend.size());
+    sorted = startJhonInsert(mainChain, Pend, JachobtalNUmbs);
     if (_has_odd)
     {
-        std::cout << _the_od_elem << "\n";
+        unsigned int pos = binarySearch(sorted, _the_od_elem);
+        sorted.insert(sorted.begin() + pos, _the_od_elem);
     }
-    startRecMerging(_vec);
+    for (unsigned int i = 0; i < sorted.size(); i++)
+    {
+        std::cout << sorted[i] << std::endl;
+    }
 }
 
 PmergeMe::~PmergeMe() {}
