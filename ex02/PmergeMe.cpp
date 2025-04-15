@@ -24,7 +24,6 @@ void PmergeMe::loadVector(char **to_conv)
         _orig.push_back(atol(to_conv[i]));
     if (_orig.size() % 2 != 0)
     {
-
         _has_odd = true;
     }
     for (size_t i = 0; i < _orig.size() - 1; i += 2)
@@ -34,6 +33,7 @@ void PmergeMe::loadVector(char **to_conv)
     if (_has_odd)
     {
         _the_od_elem = _orig[_orig.size() - 1];
+        _orig.pop_back();
     }
 
     startFordJhon(_orig);
@@ -117,18 +117,17 @@ std::vector<unsigned int> generateJacobNumbers(unsigned int size)
         return result;
     }
     result.push_back(1);
-    unsigned int curr = 1;
-    unsigned int temp = 0;
-    unsigned int next = 1;
-    while (next < size)
+    unsigned int j_fst = 1;
+    unsigned int j_scnd = 1;
+    while (j_fst < size)
     {
-        temp = next;
-        next = next + 2 * curr;
-        curr = temp;
-        for (unsigned int i = next; i > curr && i <= size; i--)
+        unsigned int j_next = j_fst + 2 * j_scnd;
+        for (unsigned int i = j_fst + 2;i <= j_next  && i < size; i++)
         {
             result.push_back(i);
         }
+        j_scnd = j_fst;
+        j_fst = j_next;
     }
     return result;
 }
@@ -136,24 +135,38 @@ std::vector<unsigned int> generateJacobNumbers(unsigned int size)
 std::vector<unsigned int> startJhonInsert(std::vector<unsigned int> &MainChain, std::vector<unsigned int> &Pend, std::vector<unsigned int> &JachobtalNUmbs)
 {
     std::vector<unsigned int> sorted;
+    std::vector<bool> has_missed(Pend.size(), false);
     unsigned int pos = 0;
-    static unsigned int idex = 0;
+    unsigned int idex = 0;
 
     if (MainChain.empty())
         return sorted;
-    sorted.push_back(MainChain[0]);
-    for (unsigned int i = 1; i < MainChain.size(); i++)
-    {
+    for (unsigned int i = 0; i < MainChain.size(); i++)
         sorted.push_back(MainChain[i]);
-    }
+    if (Pend.empty())
+        return sorted;
+    sorted.insert(sorted.begin(),Pend[0]);
+    has_missed[0] = true;
+
     for (unsigned int i = 0; i < JachobtalNUmbs.size() && i < Pend.size(); i++)
     {
         idex = JachobtalNUmbs[i];
-        if (idex >= Pend.size())
-            continue;
-        pos = binarySearch(sorted, Pend[idex]);
-        sorted.insert(sorted.begin() + pos, Pend[idex]);
+        if (idex < Pend.size() && !has_missed[idex])
+        {
+            pos = binarySearch(sorted, Pend[idex]);
+            sorted.insert(sorted.begin() + pos, Pend[idex]);
+            has_missed[idex] = true;
+        }
     }
+    for (unsigned int i = 0; i <Pend.size(); i++)
+    {
+        if (!has_missed[i])
+        {
+            pos = binarySearch(sorted, Pend[i]);
+            sorted.insert(sorted.begin() + pos, Pend[i]);
+        }
+    }
+    
     return sorted;
 }
 
@@ -168,9 +181,10 @@ void PmergeMe::startFordJhon(std::vector<unsigned int> orig)
     for (it = _vec.begin(); it != _vec.end(); ++it)
     {
         if (it->first < it->second)
-        std::swap(it->first, it->second);
+        {
+            std::swap(it->first, it->second);
+        }
     }
-    
     _vec = startRecMerging(_vec);
     for (it = _vec.begin(); it != _vec.end(); ++it)
     {

@@ -16,9 +16,7 @@ size_t binarySearch(std::vector<int> vector, int target)
     {
         int mid = (left + right) / 2;
         if (vector[mid] == target)
-        {
             return mid;
-        }
         else if (target > vector[mid])
             left = mid + 1;
         else
