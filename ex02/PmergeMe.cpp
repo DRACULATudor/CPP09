@@ -89,7 +89,7 @@ PmergeMe::startRecMerging(std::vector<std::pair<unsigned int, unsigned int> > ve
     return MergeCompPairs(left, right);
 }
 
-unsigned int binarySearch(std::vector<unsigned int> vector, unsigned int target)
+unsigned int binarySearch(std::vector<unsigned int> &vector, unsigned int target)
 {
     if (vector.empty())
         return (0);
@@ -125,10 +125,9 @@ std::vector<unsigned int> generateJacobNumbers(unsigned int size)
         temp = next;
         next = next + 2 * curr;
         curr = temp;
-        for (unsigned int i = next; i > curr; i--)
+        for (unsigned int i = next; i > curr && i <= size; i--)
         {
-            if (i <= size)
-                result.push_back(i);
+            result.push_back(i);
         }
     }
     return result;
@@ -138,23 +137,22 @@ std::vector<unsigned int> startJhonInsert(std::vector<unsigned int> &MainChain, 
 {
     std::vector<unsigned int> sorted;
     unsigned int pos = 0;
+    static unsigned int idex = 0;
 
     if (MainChain.empty())
-    {
         return sorted;
-    }
     sorted.push_back(MainChain[0]);
-    
+    for (unsigned int i = 1; i < MainChain.size(); i++)
+    {
+        sorted.push_back(MainChain[i]);
+    }
     for (unsigned int i = 0; i < JachobtalNUmbs.size() && i < Pend.size(); i++)
     {
-        if (JachobtalNUmbs[i] == 0 || JachobtalNUmbs[i] > Pend.size())
+        idex = JachobtalNUmbs[i];
+        if (idex >= Pend.size())
             continue;
-        
-        unsigned int idex = JachobtalNUmbs[i] - 1;
-
         pos = binarySearch(sorted, Pend[idex]);
         sorted.insert(sorted.begin() + pos, Pend[idex]);
-        
     }
     return sorted;
 }
