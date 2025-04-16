@@ -122,12 +122,12 @@ std::vector<unsigned int> generateJacobNumbers(unsigned int size)
     while (j_fst < size)
     {
         unsigned int j_next = j_fst + 2 * j_scnd;
-        for (unsigned int i = j_fst + 2;i <= j_next  && i < size; i++)
-        {
-            result.push_back(i);
-        }
         j_scnd = j_fst;
         j_fst = j_next;
+        if (j_next < size)
+        {
+            result.push_back(j_next);
+        }
     }
     return result;
 }
@@ -135,37 +135,30 @@ std::vector<unsigned int> generateJacobNumbers(unsigned int size)
 std::vector<unsigned int> startJhonInsert(std::vector<unsigned int> &MainChain, std::vector<unsigned int> &Pend, std::vector<unsigned int> &JachobtalNUmbs)
 {
     std::vector<unsigned int> sorted;
-    std::vector<bool> has_missed(Pend.size(), false);
     unsigned int pos = 0;
-    unsigned int idex = 0;
+    unsigned int j = 0;
 
     if (MainChain.empty())
         return sorted;
-    for (unsigned int i = 0; i < MainChain.size(); i++)
-        sorted.push_back(MainChain[i]);
     if (Pend.empty())
         return sorted;
-    sorted.insert(sorted.begin(),Pend[0]);
-    has_missed[0] = true;
-
-    for (unsigned int i = 0; i < JachobtalNUmbs.size() && i < Pend.size(); i++)
+    // sorted.push_back(MainChain[0]);
+    for (unsigned int i = 0; i < JachobtalNUmbs.size(); i++)
     {
-        idex = JachobtalNUmbs[i];
-        if (idex < Pend.size() && !has_missed[idex])
-        {
-            pos = binarySearch(sorted, Pend[idex]);
-            sorted.insert(sorted.begin() + pos, Pend[idex]);
-            has_missed[idex] = true;
-        }
-    }
-    for (unsigned int i = 0; i <Pend.size(); i++)
-    {
-        if (!has_missed[i])
+        while (j < JachobtalNUmbs[i])
         {
             pos = binarySearch(sorted, Pend[i]);
             sorted.insert(sorted.begin() + pos, Pend[i]);
+            j++;
         }
     }
+    
+    for (unsigned int i = 0; i < MainChain.size(); i++)
+    {            
+        pos = binarySearch(sorted, MainChain[i]);
+        sorted.insert(sorted.begin() + pos, MainChain[i]);
+    }
+    
     
     return sorted;
 }
