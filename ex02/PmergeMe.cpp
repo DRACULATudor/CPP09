@@ -98,14 +98,23 @@ unsigned int binarySearch(std::vector<unsigned int> &vector, unsigned int target
     while (left <= right)
     {
         unsigned int mid = (left + right) / 2;
+        std::cout << left <<  "\n"<< right / 2 << ":\n";
         if (vector[mid] == target)
+        {
             return mid;
+        }
         else if (target > vector[mid])
             left = mid + 1;
         else
+        {
+            if (right == 0)
+            {
+                break;
+            }
+            
             right = mid - 1;
+        }
     }
-
     return left;
 }
 
@@ -132,42 +141,55 @@ std::vector<unsigned int> generateJacobNumbers(unsigned int size)
     return result;
 }
 
-std::vector<unsigned int> startJhonInsert(std::vector<unsigned int> &MainChain, std::vector<unsigned int> &Pend, std::vector<unsigned int> &JachobtalNUmbs)
+std::vector<unsigned int> startJhonInsert(std::vector<unsigned int> MainChain, std::vector<unsigned int> &Pend, std::vector<unsigned int> &JachobtalNUmbs)
 {
-    std::vector<unsigned int> sorted;
     unsigned int pos = 0;
     unsigned int j = 0;
 
     if (MainChain.empty())
-        return sorted;
+        return MainChain;
     if (Pend.empty())
-        return sorted;
-    // sorted.push_back(MainChain[0]);
+        return MainChain;
+    for (unsigned int i = 0; i < Pend.size(); i++)
+    {
+        if (Pend[i])
+        {
+            std::cout << "Pend elems are: " << Pend[i] << "\n";
+        }
+    }
+    std::cout << std::endl;
+    for (unsigned int i = 0; i < MainChain.size(); i++)
+    {
+        if (MainChain[i])
+        {
+            std::cout << "Main elems are: " << MainChain[i] << "\n";
+        }
+    }
+    std::cout << std::endl;
+    std::cout << "Below is code output\n";
+    
+    
     for (unsigned int i = 0; i < JachobtalNUmbs.size(); i++)
     {
-        while (j < JachobtalNUmbs[i])
+        j = JachobtalNUmbs[i];
+        if (j < Pend.size())
         {
-            pos = binarySearch(sorted, Pend[i]);
-            sorted.insert(sorted.begin() + pos, Pend[i]);
-            j++;
+            pos = binarySearch(MainChain, Pend[j]);
+            if (pos <= MainChain.size())
+            {
+                MainChain.insert(MainChain.begin() + pos, Pend[j]);
+            }
         }
     }
     
-    for (unsigned int i = 0; i < MainChain.size(); i++)
-    {            
-        pos = binarySearch(sorted, MainChain[i]);
-        sorted.insert(sorted.begin() + pos, MainChain[i]);
-    }
-    
-    
-    return sorted;
+    return MainChain;
 }
 
 void PmergeMe::startFordJhon(std::vector<unsigned int> orig)
 {
     (void)orig;
     std::vector<unsigned int> mainChain;
-    std::vector<unsigned int> sorted;
+    std::vector<unsigned int> sorte;
     std::vector<unsigned int> Pend;
     
     std::vector<std::pair<unsigned int, unsigned int> >::iterator it;
@@ -185,15 +207,15 @@ void PmergeMe::startFordJhon(std::vector<unsigned int> orig)
         Pend.push_back(it->second);
     }
     std::vector<unsigned int> JachobtalNUmbs = generateJacobNumbers(Pend.size());
-    sorted = startJhonInsert(mainChain, Pend, JachobtalNUmbs);
+    mainChain = startJhonInsert(mainChain, Pend, JachobtalNUmbs);
     if (_has_odd)
     {
-        unsigned int pos = binarySearch(sorted, _the_od_elem);
-        sorted.insert(sorted.begin() + pos, _the_od_elem);
+        unsigned int pos = binarySearch(mainChain, _the_od_elem);
+        mainChain.insert(mainChain.begin() + pos, _the_od_elem);
     }
-    for (unsigned int i = 0; i < sorted.size(); i++)
+    for (unsigned int i = 0; i < mainChain.size(); i++)
     {
-        std::cout << sorted[i] << std::endl;
+        std::cout << mainChain[i] << std::endl;
     }
 }
 
