@@ -28,6 +28,7 @@ size_t binarySearch(std::deque<int> vector, int target)
 std::deque<int> binayinsertion(std::deque<int> vector)
 {
     size_t pos =0;
+    std::deque<int>::iterator it;
     std::deque<int> res;
     for (size_t i = 0; i != vector.size(); i++)
     {

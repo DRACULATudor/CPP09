@@ -60,5 +60,5 @@ int main()
     rez = merge_sort(_vec);
     for (size_t i = 0; i < rez.size(); i++)
         std::cout << rez[i] << std::endl;
-    return 1;
+    return 0;
 }
