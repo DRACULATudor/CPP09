@@ -9,6 +9,6 @@ int main(int argc, char *argv[])
     else
     {
         PmergeMe merge;
-        merge.loadVector(argv);   
+        merge.loadVector(argv);
     }
 }
