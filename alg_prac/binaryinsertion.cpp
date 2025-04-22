@@ -8,7 +8,7 @@
 #include <fstream>
 #include <sstream>
 
-size_t binarySearch(std::vector<int> vector, int target)
+size_t binarySearch(std::deque<int> vector, int target)
 {
     int left = 0;
     int right = vector.size() - 1;
@@ -25,10 +25,10 @@ size_t binarySearch(std::vector<int> vector, int target)
     return left;
 }
 
-std::vector<int> binayinsertion(std::vector<int> vector)
+std::deque<int> binayinsertion(std::deque<int> vector)
 {
     size_t pos =0;
-    std::vector<int> res;
+    std::deque<int> res;
     for (size_t i = 0; i != vector.size(); i++)
     {
         pos = binarySearch(res, vector[i]);
@@ -39,8 +39,8 @@ std::vector<int> binayinsertion(std::vector<int> vector)
 
 int main()
 {
-    std::vector<int> _vec = {6, 4, 15, 7, 2};
-    std::vector<int> rez;
+    std::deque<int> _vec = {6, 4, 15, 7, 2};
+    std::deque<int> rez;
     rez = binayinsertion(_vec);
     for (size_t i = 0; i < rez.size(); i++)
         std::cout << rez[i] << std::endl;
