@@ -19,6 +19,8 @@ BitcoinExchange &BitcoinExchange::operator=(const BitcoinExchange &assign)
     return *this;
 }
 
+//Leap year = year divisible by 4 and not 100 or divisibale by 400
+
 bool isgoodDate(int year, int month, int day)
 {
     if (day < 1 || day > 31)
@@ -147,7 +149,7 @@ void add_values_to_map(std::multimap<std::string, double> &map, std::string val,
 {
     static int line_num = 0;
     std::stringstream doubl;
-    std::ostringstream oss;
+    std::ostringstream oss; //allows to format and builad a string in memory;
     oss << std::setfill('0') << std::setw(3) << line_num << "_";
     std::string line_prefix = oss.str();
     std::stringstream strstr(line);
@@ -156,7 +158,9 @@ void add_values_to_map(std::multimap<std::string, double> &map, std::string val,
     line_num++;
     date = process_date(date);
     if (date.empty())
+    {
         map.insert(std::make_pair(line_prefix + line, -999));
+    }
     else if(!elsFlg)
     {
         val = SpaceRemover(val);
@@ -167,20 +171,30 @@ void add_values_to_map(std::multimap<std::string, double> &map, std::string val,
         if (doubl.fail())
         {
             if (value == 0)
+            {
                 map.insert(std::make_pair(line_prefix + line, -999));
+            }
             else
+            {
+
                 map.insert(std::make_pair(line_prefix + val, -999));
+            }
         }
         else
         {
             if (!isallNum(val))
+            {
                 map.insert(std::make_pair(line_prefix + val, -999));
+            }
             else
                 map.insert(std::make_pair(line_prefix + date, value));
         }
     }
     else
+    {
+        std::cout << date << "\n\n\n\n";
         map.insert(std::make_pair(line_prefix + date, -999));
+    }
 }
 
 std::multimap<std::string, double> BitcoinExchange::prepare_exchange(const std::string &file)
@@ -230,6 +244,7 @@ void ExchangeOutput(double val, std::string key, double exchange_rate_result)
 {
     if (validate_value(val))
     {
+        // std::cout << std::fixed << std::setprecision(2); 
         if (val == static_cast<int>(val))
             std::cout << key << " => " << static_cast<int>(val) << " = " << exchange_rate_result << std::endl;
         else
