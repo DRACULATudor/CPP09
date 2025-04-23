@@ -176,7 +176,6 @@ void add_values_to_map(std::multimap<std::string, double> &map, std::string val,
             }
             else
             {
-
                 map.insert(std::make_pair(line_prefix + val, -999));
             }
         }
@@ -187,12 +186,14 @@ void add_values_to_map(std::multimap<std::string, double> &map, std::string val,
                 map.insert(std::make_pair(line_prefix + val, -999));
             }
             else
+            {
+                
                 map.insert(std::make_pair(line_prefix + date, value));
+            }
         }
     }
     else
     {
-        std::cout << date << "\n\n\n\n";
         map.insert(std::make_pair(line_prefix + date, -999));
     }
 }
@@ -233,6 +234,7 @@ std::multimap<std::string, double> BitcoinExchange::prepare_exchange(const std::
         else
         {
             elsFlg = true;
+            getline(strstr, date);
             add_values_to_map(map,  val, date, line, elsFlg);
             elsFlg = false;
         }
