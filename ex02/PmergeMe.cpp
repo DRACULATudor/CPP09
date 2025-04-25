@@ -387,7 +387,7 @@ void PmergeMe::StartVector()
         std::cout << mainChain[i]  << " ";
     }
     std::cout << std::endl;
-    std::cout << "Time to process a range of " << mainChain.size() << " elements with std::vector : " << time * 10 << " us" << std::endl; 
+    std::cout << "Time to process a range of " << mainChain.size() << " elements with std::vector : " << time * 100 << " us" << std::endl; 
 }
 
 void PmergeMe::StartDeque()
@@ -433,7 +433,7 @@ void PmergeMe::StartDeque()
     //     std::cout << mainChain_deq[i]  << " ";
     // }
     // std::cout << std::endl;
-    std::cout << "Time to process a range of " << mainChain_deq.size() << " elements with std::deque : " << time * 10 << " us" << std::endl; 
+    std::cout << "Time to process a range of " << mainChain_deq.size() << " elements with std::deque : " << time * 100 << " us" << std::endl; 
 }
 
 void PmergeMe::startFordJhon()
